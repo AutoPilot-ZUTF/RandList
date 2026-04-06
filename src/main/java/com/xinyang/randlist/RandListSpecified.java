@@ -29,12 +29,20 @@ public class RandListSpecified extends RandList {
     }
 
     public List<String> generateSpecifiedList() {
+        validateInput();
         List<String> finalResult = new ArrayList<>();
         List<Integer> resultIndex = super.generateList();
+        /*
         for (int i = 0; i < resultIndex.size(); i++) {
             finalResult.add(specifiedList.get(resultIndex.get(i)));
         }
-        return finalResult.stream().sorted().collect(Collectors.toList());
+        finalResult.stream().sorted().collect(Collectors.toList());
+        */
+        finalResult = resultIndex.stream()
+                .map(specifiedList::get)
+                .sorted()
+                .collect(Collectors.toList());
+        return finalResult;
     }
 
     public List<String> getSpecifiedList() {
