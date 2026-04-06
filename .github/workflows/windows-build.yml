@@ -34,12 +34,12 @@ jobs:
 
       - name: Package exe
         run: |
-          jpackage ^
-            --type app-image ^
-            --name RandList ^
-            --input target\\app-input ^
-            --main-jar RandList-1.0-SNAPSHOT.jar ^
-            --main-class com.xinyang.randlist.Launcher ^
+          jpackage `
+            --type app-image `
+            --name RandList `
+            --input target\\app-input `
+            --main-jar RandList-1.0-SNAPSHOT.jar `
+            --main-class com.xinyang.randlist.Launcher `
             --icon src\\main\\resources\\appIcon.ico
 
       - name: Upload artifact
