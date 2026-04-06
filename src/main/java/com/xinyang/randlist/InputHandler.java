@@ -18,6 +18,7 @@ public class InputHandler {
             case "Include" -> handleIncludeMode(lowerText, upperText, amountText, listText);
             case "Exclude" -> handleExcludeMode(lowerText, upperText, amountText, listText);
             case "Specify" -> handleSpecifyMode(listText, amountText);
+
             default -> throw new InvalidInputException("Invalid mode.");
         };
     }
