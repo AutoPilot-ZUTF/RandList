@@ -9,7 +9,7 @@ public class RandListSpecified extends RandList {
     private List<String> specifiedList;
 
     public RandListSpecified(int amount, List<String> specifiedList) {
-        super(0, specifiedList.stream().distinct().collect(Collectors.toList()).size() - 1, amount);
+        super(0, (int) specifiedList.stream().distinct().count() - 1, amount);
         this.specifiedList = specifiedList;
     }
 
