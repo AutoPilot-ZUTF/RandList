@@ -51,5 +51,5 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RandList
+          name: RandList_Windows
           path: RandList_Windows.zip
