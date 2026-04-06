@@ -13,6 +13,9 @@ RandList is a JavaFX desktop application for generating random lists under sever
 - **Input validation**: centralized validation with custom exception handling.
 - **Input memory**: remembers user inputs for different modes in the GUI.
 
+- <img width="437" height="406" alt="Screenshot 2026-04-06 at 21 32 19" src="https://github.com/user-attachments/assets/1e032410-d184-4d95-97d5-aad68da7c83a" />
+
+
 ## Project Structure
 
 The project is organized into UI, input handling, domain logic, and validation/error handling.
