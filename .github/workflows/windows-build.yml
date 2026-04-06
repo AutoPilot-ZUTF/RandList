@@ -40,7 +40,6 @@ jobs:
             --input target\\app-input `
             --main-jar RandList-1.0-SNAPSHOT.jar `
             --main-class com.xinyang.randlist.Launcher `
-            --add-modules javafx.controls,javafx.fxml `
             --icon src\\main\\resources\\appIcon.ico
 
       - name: Upload artifact
