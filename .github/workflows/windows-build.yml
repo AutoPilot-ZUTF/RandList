@@ -32,7 +32,7 @@ jobs:
       - name: Package exe
         run: |
           jpackage ^
-            --type exe ^
+            --type app-image ^
             --name RandList ^
             --input target\\app-input ^
             --main-jar RandList-1.0-SNAPSHOT.jar ^
@@ -43,4 +43,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: RandList-windows
-          path: RandList.exe
+          path: RandList
