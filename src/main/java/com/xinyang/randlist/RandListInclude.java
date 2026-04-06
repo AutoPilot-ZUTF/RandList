@@ -60,12 +60,4 @@ public class RandListInclude extends RandList{
         resultList.addAll(includeList);
         return resultList.stream().sorted().collect(Collectors.toList());
     }
-
-    public List<Integer> getIncludeList() {
-        return includeList;
-    }
-
-    public void setIncludeList(List<Integer> includeList) {
-        this.includeList = includeList;
-    }
 }

@@ -66,13 +66,4 @@ public class RandListExclude extends RandList {
         List<Integer> resultList = super.pickDistinctNumbers(candidateList, getAmount());
         return resultList.stream().sorted().collect(Collectors.toList());
     }
-
-
-    public List<Integer> getExcludeList() {
-        return excludeList;
-    }
-
-    public void setExcludeList(List<Integer> excludeList) {
-        this.excludeList = excludeList;
-    }
 }

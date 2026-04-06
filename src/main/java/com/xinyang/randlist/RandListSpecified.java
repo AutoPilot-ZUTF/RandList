@@ -44,12 +44,4 @@ public class RandListSpecified extends RandList {
                 .collect(Collectors.toList());
         return finalResult;
     }
-
-    public List<String> getSpecifiedList() {
-        return specifiedList;
-    }
-
-    public void setSpecifiedList(List<String> specifiedList) {
-        this.specifiedList = specifiedList;
-    }
 }

@@ -76,23 +76,11 @@ public class RandList {
         return lowerBound;
     }
 
-    public void setLowerBound(int lowerBound) {
-        this.lowerBound = lowerBound;
-    }
-
     public int getUpperBound() {
         return upperBound;
     }
 
-    public void setUpperBound(int upperBound) {
-        this.upperBound = upperBound;
-    }
-
     public int getAmount() {
         return amount;
-    }
-
-    public void setAmount(int amount) {
-        this.amount = amount;
     }
 }
