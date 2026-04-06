@@ -46,7 +46,7 @@ jobs:
       - name: Zip app image
         shell: pwsh
         run: |
-          Compress-Archive -Path RandList\* -DestinationPath RandList-windows.zip -Force
+          Compress-Archive -Path RandList\* -DestinationPath RandList_Windows.zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
