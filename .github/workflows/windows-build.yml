@@ -3,9 +3,6 @@ name: Build Windows App
 on:
   workflow_dispatch:
 
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
 jobs:
   build:
     runs-on: windows-latest
@@ -27,24 +24,32 @@ jobs:
         run: mvn dependency:copy-dependencies -DincludeScope=runtime -DoutputDirectory=target\\deps
 
       - name: Prepare input
+        shell: pwsh
         run: |
-          mkdir target\\app-input
-          copy target\\RandList-1.0-SNAPSHOT.jar target\\app-input\\
-          copy target\\deps\\*.jar target\\app-input\\
+          New-Item -ItemType Directory -Force -Path target\app-input | Out-Null
+          Copy-Item target\RandList-*.jar target\app-input\
+          Copy-Item target\deps\*.jar target\app-input\
 
-      - name: Package exe
+      - name: Package app image
+        shell: pwsh
         run: |
+          $mainJar = (Get-ChildItem target\app-input\RandList-*.jar | Select-Object -First 1).Name
           jpackage `
             --type app-image `
             --name RandList `
-            --input target\\app-input `
-            --main-jar RandList-1.0-SNAPSHOT.jar `
+            --input target\app-input `
+            --main-jar $mainJar `
             --main-class com.xinyang.randlist.Launcher `
             --java-options "--add-modules=javafx.controls,javafx.fxml" `
-            --icon src\\main\\resources\\appIcon.ico
+            --icon src\main\resources\appIcon.ico
+
+      - name: Zip app image
+        shell: pwsh
+        run: |
+          Compress-Archive -Path RandList\* -DestinationPath RandList-windows.zip -Force
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: RandList-windows
-          path: RandList
+          name: RandList
+          path: RandList_Windows.zip
