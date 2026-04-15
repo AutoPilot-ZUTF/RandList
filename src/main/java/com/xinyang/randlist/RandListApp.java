@@ -365,7 +365,7 @@ public class RandListApp extends Application {
 
             dynamicInputBox.getChildren().add(modeBox);
         } else if (specifyButton.isSelected()) {
-            specifyList = createInputField("string list: a,ß,...", specifiedListWidth);
+            specifyList = createInputField("string list: a,ß,text...", specifiedListWidth);
             specifyAmount = createInputField("integer", smallFieldWidth);
 
             HBox specifyModeBox = new HBox(boxSpacing);
