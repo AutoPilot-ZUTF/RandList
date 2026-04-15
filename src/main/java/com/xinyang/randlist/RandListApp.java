@@ -285,7 +285,7 @@ public class RandListApp extends Application {
             }
         });
 
-        primaryStage.setTitle("RandList");
+        primaryStage.setTitle("RandList v1.1");
         primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         primaryStage.show();
