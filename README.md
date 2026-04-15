@@ -221,7 +221,3 @@ Output:
 - Java
 - JavaFX
 - Maven
-
-## Notes
-
-This README is based on the project UML design. If implementation details differ slightly from the diagram, the source code should be treated as the final reference.
