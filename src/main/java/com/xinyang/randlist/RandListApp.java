@@ -10,8 +10,8 @@ import javafx.scene.layout.VBox;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
+
 import java.util.List;
 
 public class RandListApp extends Application {
@@ -25,6 +25,7 @@ public class RandListApp extends Application {
     private final double specifiedListWidth = 238;
     private double resultPrefixWidth = 30;
     private final double maximumHeight = 720;
+    private double windowDecorationHeight = -1;
 
     // ===== UI组件 =====
     private Button generateButton;
@@ -50,6 +51,7 @@ public class RandListApp extends Application {
     private final InputMemory inputMemory = new InputMemory();
 
     private VBox resultBox;
+    private ScrollPane resultScrollPane;
     private Label resultsTitleLabel;
     private Label resultsTitleLabelSub;
     private Label contentLabel;
@@ -124,7 +126,7 @@ public class RandListApp extends Application {
             saveCurrentModeInputs();
             updateDynamicInputBox(dynamicInputBox);
             clearButton.setText("Clear All");
-            primaryStage.sizeToScene();
+            updateResultScrollState(primaryStage);
         });
 
         // 分隔线 3
@@ -138,52 +140,42 @@ public class RandListApp extends Application {
         generateButton.setFont(Font.font("SF Mono", FontWeight.BOLD, 15));
         generateButton.setOnAction(event -> {
             try {
-                resultPrefixWidth = 30;
+                if (resultCount < 100) {
+                    resultPrefixWidth = 30;
+                } else {
+                    resultPrefixWidth = 38;
+                }
                 prefix = String.format("%02d: ", resultCount);
                 InputHandler inputHandler = new InputHandler();
                 String mode = ((RadioButton) modeSelector.getSelectedToggle()).getText();
                 String listText = "";
-                if (primaryStage.getHeight() <= maximumHeight) {
-                    if (includeButton.isSelected()) {
-                        listText = includeList.getText();
-                    } else if (excludeButton.isSelected()) {
-                        listText = excludeList.getText();
-                    } else if (specifyButton.isSelected()) {
-                        listText = specifyList.getText();
-                    }
-                    String amountText = specifyButton.isSelected() ? specifyAmount.getText() : desiredAmount.getText();
-                    List<?> result = inputHandler.handleGenerate(
-                            mode,
-                            lowerBound.getText(),
-                            upperBound.getText(),
-                            amountText,
-                            listText
-                    );
-                    appendResult(result.toString());
-                    clearButton.setText("Clear All");
-                    primaryStage.sizeToScene();
+                if (includeButton.isSelected()) {
+                    listText = includeList.getText();
+                } else if (excludeButton.isSelected()) {
+                    listText = excludeList.getText();
+                } else if (specifyButton.isSelected()) {
+                    listText = specifyList.getText();
                 }
-                if (primaryStage.getHeight() > maximumHeight && (resultCount > 0 || errorCount > 0)) {
-                    generateButton.setDisable(true);
-                    clearButton.setText("Clear All");
-                    resultsTitleLabelSub.setVisible(true);
-                    if (primaryStage.getHeight() > maximumHeight && primaryStage.getHeight() < Screen.getPrimary().getBounds().getHeight()) {
-                        resultsTitleLabelSub.setText("(Clear all to regenerate)");
-                    } else {
-                        resultsTitleLabelSub.setText("(Results may not be visible)");
-                        resultsTitleLabelSub.setPadding(new Insets(0, 0, -20, 62));
-                        primaryStage.centerOnScreen();
-                    }
-                }
+                String amountText = specifyButton.isSelected() ? specifyAmount.getText() : desiredAmount.getText();
+                List<?> result = inputHandler.handleGenerate(
+                        mode,
+                        lowerBound.getText(),
+                        upperBound.getText(),
+                        amountText,
+                        listText
+                );
+                appendResult(result.toString());
+                clearButton.setText("Clear All");
+                updateResultScrollState(primaryStage);
             } catch (RuntimeException exception) {
                 String currentExceptionMessage = exception.getMessage();
                 if (!java.util.Objects.equals(currentExceptionMessage, lastExceptionMessage)) {
                     errorCount++;
                     prefix = "Error:";
-                    resultPrefixWidth = 50;
+                    resultPrefixWidth = 53;
                     appendResult(currentExceptionMessage);
                     lastExceptionMessage = currentExceptionMessage;
-                    primaryStage.sizeToScene();
+                    updateResultScrollState(primaryStage);
                 }
             }
         });
@@ -201,9 +193,7 @@ public class RandListApp extends Application {
             } else {
                 clearResults();
                 clearButton.setText("Clear All");
-                generateButton.setDisable(false);
-                resultsTitleLabelSub.setVisible(false);
-                primaryStage.sizeToScene();
+                updateResultScrollState(primaryStage);
             }
         });
 
@@ -214,20 +204,24 @@ public class RandListApp extends Application {
         // 结果区分隔线
         resultSeparator = new Separator();
         resultSeparator.setPadding(new Insets(0, -13, 0, -13));
+        resultSeparator.setMinWidth(resultWidth);
+        resultSeparator.setPrefWidth(resultWidth);
+        resultSeparator.setMaxWidth(resultWidth);
 
         // 结果标题
         resultsTitleLabel = new Label("Results:");
         resultsTitleLabel.setFont(Font.font("SF Mono", FontWeight.BOLD, 15));
         resultsTitleLabel.setAlignment(Pos.TOP_LEFT);
 
-        resultsTitleLabelSub = new Label();
-        resultsTitleLabelSub.setFont(Font.font("SF Mono", 13));
-        resultsTitleLabelSub.setPadding(new Insets(0, 0, -20, 85));
+        resultsTitleLabelSub = new Label("(Click to copy)");
+        resultsTitleLabelSub.setFont(Font.font("SF Mono", 12));
+        resultsTitleLabelSub.setPadding(new Insets(3, 0, 0, 120.3));
         resultsTitleLabelSub.setVisible(false);
+        resultsTitleLabelSub.setManaged(false);
 
         resultsTitleLabelBox = new HBox();
         resultsTitleLabelBox.setAlignment(Pos.TOP_LEFT);
-        resultsTitleLabelBox.setPadding(new Insets(2, 0, 2, 0));
+        resultsTitleLabelBox.setPadding(new Insets(-3, 0, -3, 13));
         resultsTitleLabelBox.getChildren().addAll(resultsTitleLabel, resultsTitleLabelSub);
 
 
@@ -236,9 +230,35 @@ public class RandListApp extends Application {
         resultBox.setAlignment(Pos.TOP_CENTER);
         resultBox.setMaxWidth(resultWidth);
         resultBox.setPrefWidth(resultWidth);
-        resultBox.getChildren().addAll(resultSeparator, resultsTitleLabelBox);
+        resultBox.setPadding(new Insets(0, 0, 0, 13));
         resultBox.setVisible(false);
         resultBox.setManaged(false);
+
+        resultSeparator.setVisible(false);
+        resultSeparator.setManaged(false);
+        resultsTitleLabelBox.setVisible(false);
+        resultsTitleLabelBox.setManaged(false);
+
+        resultScrollPane = new ScrollPane(resultBox);
+        resultScrollPane.setFitToWidth(true);
+        resultScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        resultScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        resultScrollPane.setPannable(true);
+        resultScrollPane.setVisible(false);
+        resultScrollPane.setManaged(false);
+        resultScrollPane.setPrefViewportHeight(0);
+
+        // 修改 1：增加这一行，强制允许 ScrollPane 缩小到 0
+        resultScrollPane.setMinHeight(0);
+
+        // 修改 2：在 style 中加入 -fx-background-insets: 0; 去除自带的微小边框影响
+        resultScrollPane.setStyle("-fx-background-color: transparent; -fx-background-insets: 0; -fx-padding: 0;");
+
+        // 监听 resultBox 的高度变化，一旦高度增加，就自动滚动到最底部
+        resultBox.heightProperty().addListener((observable, oldValue, newValue) -> {
+            // 设置垂直滚动条的值为最大值 (通常默认 vmax 就是 1.0)
+            resultScrollPane.setVvalue(resultScrollPane.getVmax());
+        });
 
         // 主布局容器
         VBox mainBox = new VBox(boxSpacing);
@@ -253,7 +273,9 @@ public class RandListApp extends Application {
         mainBox.getChildren().add(dynamicInputBox);
         mainBox.getChildren().add(line3);
         mainBox.getChildren().add(buttonBox);
-        mainBox.getChildren().add(resultBox);
+        mainBox.getChildren().add(resultSeparator);
+        mainBox.getChildren().add(resultsTitleLabelBox);
+        mainBox.getChildren().add(resultScrollPane);
 
         // 创建场景并显示窗口
         Scene scene = new Scene(mainBox, windowWidth, Region.USE_COMPUTED_SIZE);
@@ -267,9 +289,10 @@ public class RandListApp extends Application {
         primaryStage.setResizable(false);
         primaryStage.setScene(scene);
         primaryStage.show();
+        primaryStage.sizeToScene();
+        windowDecorationHeight = primaryStage.getHeight() - primaryStage.getScene().getHeight();
         primaryStage.centerOnScreen();
         primaryStage.setY(primaryStage.getY() - 150);
-        primaryStage.sizeToScene();
         //mainBox.requestFocus();
     }
 
@@ -342,7 +365,7 @@ public class RandListApp extends Application {
 
             dynamicInputBox.getChildren().add(modeBox);
         } else if (specifyButton.isSelected()) {
-            specifyList = createInputField("string list: a,bc,3...", specifiedListWidth);
+            specifyList = createInputField("string list: a,ß,...", specifiedListWidth);
             specifyAmount = createInputField("integer", smallFieldWidth);
 
             HBox specifyModeBox = new HBox(boxSpacing);
@@ -398,41 +421,141 @@ public class RandListApp extends Application {
         }
     }
 
+    private void updateResultScrollState(Stage primaryStage) {
+        double fixedX = primaryStage.getX();
+        double fixedY = primaryStage.getY();
+
+        if (windowDecorationHeight < 0) {
+            windowDecorationHeight = primaryStage.getHeight() - primaryStage.getScene().getHeight();
+        }
+
+        Region root = (Region) primaryStage.getScene().getRoot();
+
+        resultScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+
+        if (!resultScrollPane.isVisible()) {
+            resultScrollPane.setPrefViewportHeight(0);
+
+            root.applyCss();
+            root.layout();
+
+            double desiredSceneHeight = root.prefHeight(windowWidth);
+            primaryStage.setHeight(Math.min(desiredSceneHeight + windowDecorationHeight, maximumHeight));
+            primaryStage.setX(fixedX);
+            primaryStage.setY(fixedY);
+            return;
+        }
+
+        root.applyCss();
+        root.layout();
+
+        double contentHeight;
+        contentHeight = resultBox.prefHeight(resultWidth);
+        resultScrollPane.setPrefViewportHeight(contentHeight);
+
+
+        root.applyCss();
+        root.layout();
+
+        double desiredSceneHeight = root.prefHeight(windowWidth);
+        double allowedSceneHeight = maximumHeight - windowDecorationHeight;
+
+        if (desiredSceneHeight > allowedSceneHeight) {
+            double overflow = desiredSceneHeight - allowedSceneHeight;
+            double targetViewportHeight = Math.max(80, contentHeight - overflow);
+
+            resultScrollPane.setPrefViewportHeight(targetViewportHeight);
+            resultScrollPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
+
+            root.applyCss();
+            root.layout();
+            primaryStage.setHeight(maximumHeight);
+        } else {
+            primaryStage.setHeight(desiredSceneHeight + windowDecorationHeight);
+        }
+
+
+        primaryStage.setX(fixedX);
+        primaryStage.setY(fixedY);
+
+    }
+
     // 添加一条结果：左侧编号固定宽度，右侧内容自动换行
     private void appendResult(String resultText) {
-        if (!prefix.equals("Error:")) {
+        Label currentPrefixLabel;
+        Label currentContentLabel;
+        String currentPrefix = prefix;
+
+        if (!currentPrefix.equals("Error:")) {
             resultCount++;
-            prefix = String.format("%02d: ", resultCount);
-            prefixLabel = new Label(prefix);
-            prefixLabel.setFont(Font.font("SF Mono", 12));
-            prefixLabel.setMinWidth(resultPrefixWidth);
-            prefixLabel.setPrefWidth(resultPrefixWidth);
-            prefixLabel.setMaxWidth(resultPrefixWidth);
-            prefixLabel.setAlignment(Pos.TOP_LEFT);
+            currentPrefix = String.format("%02d: ", resultCount);
 
-            contentLabel = new Label(resultText);
-            contentLabel.setWrapText(true);
-            contentLabel.setFont(Font.font("SF Mono", 12));
-            contentLabel.setMinWidth(resultWidth - resultPrefixWidth);
-            contentLabel.setPrefWidth(resultWidth - resultPrefixWidth);
-            contentLabel.setMaxWidth(resultWidth - resultPrefixWidth);
-            contentLabel.setAlignment(Pos.TOP_LEFT);
+            currentPrefixLabel = new Label(currentPrefix);
+            currentPrefixLabel.setFont(Font.font("SF Mono", 12));
+            currentPrefixLabel.setMinWidth(resultPrefixWidth);
+            currentPrefixLabel.setPrefWidth(resultPrefixWidth);
+            currentPrefixLabel.setMaxWidth(resultPrefixWidth);
+            currentPrefixLabel.setAlignment(Pos.TOP_LEFT);
+
+            String copiedText = currentPrefix + resultText;
+            currentPrefixLabel.setOnMouseClicked(event -> {
+                javafx.scene.input.ClipboardContent clipboardContent = new javafx.scene.input.ClipboardContent();
+                clipboardContent.putString(copiedText);
+                javafx.scene.input.Clipboard.getSystemClipboard().setContent(clipboardContent);
+            });
+            currentPrefixLabel.setOnMouseEntered(event -> {
+                currentPrefixLabel.setFont(Font.font("SF Mono", FontWeight.BOLD, 12));
+                resultsTitleLabelSub.setVisible(true);
+                resultsTitleLabelSub.setManaged(true);
+            });
+            currentPrefixLabel.setOnMouseExited(event -> {
+                currentPrefixLabel.setFont(Font.font("SF Mono", 12));
+                resultsTitleLabelSub.setVisible(false);
+                resultsTitleLabelSub.setManaged(false);
+            });
+            currentPrefixLabel.setStyle("-fx-cursor: hand;");
+
+            currentContentLabel = new Label(resultText);
+            currentContentLabel.setWrapText(true);
+            currentContentLabel.setFont(Font.font("SF Mono", 12));
+            currentContentLabel.setMinWidth(resultWidth - resultPrefixWidth);
+            currentContentLabel.setPrefWidth(resultWidth - resultPrefixWidth);
+            currentContentLabel.setMaxWidth(resultWidth - resultPrefixWidth);
+            currentContentLabel.setAlignment(Pos.TOP_LEFT);
         } else {
-            contentLabel = new Label(resultText);
-            contentLabel.setWrapText(true);
-            contentLabel.setFont(Font.font("SF Mono", 12));
-            contentLabel.setStyle("-fx-text-fill: #b63f3a;");
-            contentLabel.setMinWidth(resultWidth - resultPrefixWidth);
-            contentLabel.setPrefWidth(resultWidth - resultPrefixWidth);
-            contentLabel.setMaxWidth(resultWidth - resultPrefixWidth);
-            contentLabel.setAlignment(Pos.TOP_LEFT);
+            currentPrefixLabel = new Label(currentPrefix);
+            currentPrefixLabel.setFont(Font.font("SF Mono", 12));
+            currentPrefixLabel.setMinWidth(resultPrefixWidth);
+            currentPrefixLabel.setPrefWidth(resultPrefixWidth);
+            currentPrefixLabel.setMaxWidth(resultPrefixWidth);
+            currentPrefixLabel.setAlignment(Pos.TOP_LEFT);
 
-            prefixLabel = new Label(prefix);
-            prefixLabel.setFont(Font.font("SF Mono", 12));
-            prefixLabel.setMinWidth(resultPrefixWidth);
-            prefixLabel.setPrefWidth(resultPrefixWidth);
-            prefixLabel.setMaxWidth(resultPrefixWidth);
-            prefixLabel.setAlignment(Pos.TOP_LEFT);
+            String copiedText = currentPrefix + " " + resultText;
+            currentPrefixLabel.setOnMouseClicked(event -> {
+                javafx.scene.input.ClipboardContent clipboardContent = new javafx.scene.input.ClipboardContent();
+                clipboardContent.putString(copiedText);
+                javafx.scene.input.Clipboard.getSystemClipboard().setContent(clipboardContent);
+            });
+            currentPrefixLabel.setOnMouseEntered(event -> {
+                currentPrefixLabel.setFont(Font.font("SF Mono", FontWeight.BOLD, 12));
+                resultsTitleLabelSub.setVisible(true);
+                resultsTitleLabelSub.setManaged(true);
+            });
+            currentPrefixLabel.setOnMouseExited(event -> {
+                currentPrefixLabel.setFont(Font.font("SF Mono", 12));
+                resultsTitleLabelSub.setVisible(false);
+                resultsTitleLabelSub.setManaged(false);
+            });
+            currentPrefixLabel.setStyle("-fx-cursor: hand;");
+
+            currentContentLabel = new Label(resultText);
+            currentContentLabel.setWrapText(true);
+            currentContentLabel.setFont(Font.font("SF Mono", 12));
+            currentContentLabel.setStyle("-fx-text-fill: #b63f3a;");
+            currentContentLabel.setMinWidth(resultWidth - resultPrefixWidth);
+            currentContentLabel.setPrefWidth(resultWidth - resultPrefixWidth);
+            currentContentLabel.setMaxWidth(resultWidth - resultPrefixWidth);
+            currentContentLabel.setAlignment(Pos.TOP_LEFT);
         }
 
         HBox row = new HBox(0);
@@ -440,10 +563,16 @@ public class RandListApp extends Application {
         row.setMinWidth(resultWidth);
         row.setPrefWidth(resultWidth);
         row.setMaxWidth(resultWidth);
-        row.getChildren().addAll(prefixLabel, contentLabel);
+        row.getChildren().addAll(currentPrefixLabel, currentContentLabel);
 
+        resultSeparator.setVisible(true);
+        resultSeparator.setManaged(true);
+        resultsTitleLabelBox.setVisible(true);
+        resultsTitleLabelBox.setManaged(true);
         resultBox.setVisible(true);
         resultBox.setManaged(true);
+        resultScrollPane.setVisible(true);
+        resultScrollPane.setManaged(true);
         resultBox.getChildren().add(row);
     }
 
@@ -452,9 +581,18 @@ public class RandListApp extends Application {
         resultCount = 0;
         errorCount = 0;
         lastExceptionMessage = null;
-        resultBox.getChildren().setAll(resultSeparator, resultsTitleLabelBox);
+        resultBox.getChildren().clear();
+        resultSeparator.setVisible(false);
+        resultSeparator.setManaged(false);
+        resultsTitleLabelBox.setVisible(false);
+        resultsTitleLabelBox.setManaged(false);
         resultBox.setVisible(false);
         resultBox.setManaged(false);
+        resultScrollPane.setVisible(false);
+        resultScrollPane.setManaged(false);
+        resultScrollPane.setVvalue(0);
+        resultsTitleLabelSub.setVisible(false);
+        resultsTitleLabelSub.setManaged(false);
         clearButton.setText("Clear All");
     }
 }
