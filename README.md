@@ -175,7 +175,7 @@ Notes:
 Used by **Specify** mode:
 
 ```text
-apple, banana, cherry
+apple,banana,cherry
 ```
 
 Notes:
