@@ -1,230 +1,316 @@
 # RandList
 
-RandList is a JavaFX desktop application for generating random lists under several modes, including simple generation, inclusion, exclusion, and specified-list selection.
+RandList is a JavaFX desktop application for generating **distinct random results** through four modes: **Simple**, **Include**, **Exclude**, and **Specify**.
+
+It is designed for quick use with a minimal UI, clear validation feedback, clickable result copying, and per-mode input memory.
 
 ## Features
 
-- **Simple mode**: generate distinct random integers within a lower and upper bound.
-- **Include mode**: generate random integers while forcing a given set of numbers to be included.
-- **Exclude mode**: generate random integers while removing a given set of numbers from the candidate range.
-- **Specify mode**: generate results from a user-provided list of strings instead of an integer range.
-- **Clickable results**: click the result prefix (e.g., `01:`) to copy the corresponding result.
-- **Hover feedback**: hovering over a result prefix highlights it and shows a copy hint in the UI.
-- **Auto layout & wrapping**: results automatically wrap and align cleanly in the output area.
-- **Input validation**: centralized validation with custom exception handling.
-- **Input memory**: remembers user inputs for different modes in the GUI.
+- **Four generation modes**
+  - **Simple**: generate distinct random integers within a numeric range.
+  - **Include**: force specific integers to appear in the final result.
+  - **Exclude**: remove specific integers from the candidate pool before generation.
+  - **Specify**: generate results from a user-provided list of strings instead of a numeric range.
+- **Distinct output**: results never contain duplicate elements.
+- **Sorted output**: generated results are displayed in sorted order.
+- **Clickable result prefixes**: click a prefix such as `01:` to copy the full corresponding line.
+- **Hover feedback**: hovering over a clickable prefix shows a copy hint in the results header.
+- **Auto-growing result area**: the window grows with content until a maximum height is reached, then enables scrolling.
+- **Per-mode input memory**: each mode remembers the last values entered when switching between modes.
+- **Centralized validation**: invalid input is handled through a custom runtime exception with readable error messages.
+- **Keyboard-friendly flow**: pressing **Enter** triggers generation.
 
 ## UI Preview
 
 <img width="437" height="406" alt="RandList UI" src="https://github.com/user-attachments/assets/1e032410-d184-4d95-97d5-aad68da7c83a" />
 
+## Current UI / App Behavior
 
-## Project Structure
+Based on the current implementation:
 
-The project is organized into UI, input handling, domain logic, and validation/error handling.
-
-### UI Layer
-
-#### `Launcher`
-Application entry point.
-
-- `main(String[])`: launches the application.
-
-#### `RandListApp`
-JavaFX GUI application.
-
-Main responsibilities:
-- start the primary stage
-- build and update mode-specific input areas
-- append results to the output area
-- clear results
-- save and restore current mode inputs
-
-Key methods:
-- `start(Stage)`
-- `appendResult(String)`
-- `updateDynamicInputBox(VBox)`
-- `clearResults()`
-- `saveCurrentModeInputs()`
-- `restoreCurrentModeInputs()`
-- `createInputField(String, double)`
-- `withLabel(String, TextField)`
-
-### Input Layer
-
-#### `InputHandler`
-Converts raw text input from the UI into typed values and delegates to the appropriate generation mode.
-
-Main responsibilities:
-- parse integer fields
-- parse comma-separated integer lists
-- parse string lists
-- dispatch requests by mode
-
-Key methods:
-- `parseIntField(String)`
-- `parseIntegerList(String)`
-- `parseStringList(String)`
-- `handleGenerate(String, String, String, String, String)`
-- `handleSimpleMode(String, String, String)`
-- `handleIncludeMode(String, String, String, String)`
-- `handleExcludeMode(String, String, String, String)`
-- `handleSpecifyMode(String, String)`
-
-#### `InputMemory`
-Stores the latest inputs for each mode so the UI can restore them when the user switches modes.
-
-Stored fields include:
-- simple mode: lower bound, upper bound, amount
-- include mode: lower bound, upper bound, amount, include list
-- exclude mode: lower bound, upper bound, amount, exclude list
-- specify mode: amount, specify list
-
-Key method:
-- `clear()`
-
-### Core Domain Layer
-
-#### `RandList`
-Base class for integer-based random list generation.
-
-Core responsibilities:
-- store the numeric generation range and target amount
-- validate shared input rules
-- build a candidate list
-- randomly select distinct numbers
-- generate the final result list
-- provide shared error messages
-
-Key methods:
-- `RandList(int, int, int)`
-- `validateInput()`
-- `buildCandidateList()`
-- `pickDistinctNumbers(List<Integer>, int)`
-- `generateList()`
-- `commonErrorList()`
-
-Core fields:
-- `lowerBound`
-- `upperBound`
-- `amount`
-
-#### `RandListInclude`
-Subclass of `RandList` for include mode.
-
-Purpose:
-- guarantees that a given integer list is included in the final result
-
-Key methods:
-- `RandListInclude(int, int, int, List<Integer>)`
-- `validateInput()`
-- `buildCandidateList()`
-- `pickDistinctNumbers(List<Integer>, int)`
-- `generateIncludeList()`
-- `commonErrorList()`
-
-#### `RandListExclude`
-Subclass of `RandList` for exclude mode.
-
-Purpose:
-- removes a given integer list from the candidate pool before generation
-
-Key methods:
-- `RandListExclude(int, int, int, List<Integer>)`
-- `validateInput()`
-- `buildCandidateList()`
-- `validateInput()`
-- `generateExcludeList()`
-- `commonErrorList()`
-
-#### `RandListSpecified`
-Independent generator for specified-list mode.
-
-Purpose:
-- randomly select items from a provided `List<String>`
-
-Key methods:
-- `RandListSpecified(int, List<String>)`
-- `validateInput()`
-- `generateSpecifiedList()`
-
-### Validation and Exception Handling
-
-#### `InvalidInputException`
-Custom exception used when user input violates validation rules.
-
-Key constructor:
-- `InvalidInputException(String)`
-
-## Relationships Between Classes
-
-- `Launcher` starts `RandListApp`.
-- `RandListApp` uses `InputHandler` to process user input.
-- `RandListApp` owns an `InputMemory` instance to preserve form state.
-- `InputHandler` creates and uses:
-  - `RandList` for simple mode
-  - `RandListInclude` for include mode
-  - `RandListExclude` for exclude mode
-  - `RandListSpecified` for specify mode
-- `RandListInclude` and `RandListExclude` extend `RandList`.
-- Validation failures are reported with `InvalidInputException`.
+- Window title: `RandList v1.1`
+- Window is **not resizable**
+- Results are numbered as `01:`, `02:`, ...
+- Error messages are shown as `Error:` entries in the same result area
+- Repeating the **same consecutive error message** will not append a duplicate error entry
+- The **Clear All** button uses a confirmation step: `Clear All` → `Confirm`
 
 ## Supported Modes
 
 ### 1. Simple
-Input:
-- lower bound
-- upper bound
-- amount
 
-Output:
-- a list of distinct random integers inside the range
+**Inputs**
+- `Lower bound`
+- `Upper bound`
+- `Amount`
+
+**Behavior**
+- Builds a candidate list from `lowerBound` to `upperBound` (inclusive)
+- Randomly selects distinct integers
+- Sorts the final result before display
+
+**Example output**
+```text
+[2, 5, 9, 11]
+```
 
 ### 2. Include
-Input:
-- lower bound
-- upper bound
-- amount
-- include list
 
-Output:
-- a list of distinct random integers that must contain the specified integers
+**Inputs**
+- `Lower bound`
+- `Upper bound`
+- `Amount`
+- `Elements to include`
+
+**Behavior**
+- Validates that all included integers are inside the range
+- Removes the included integers from the candidate pool
+- Randomly fills the remaining slots
+- Adds the required integers back and sorts the final result
+
+**Example**
+Range `1-10`, amount `5`, include list `2,7`
+
+Possible result:
+```text
+[2, 4, 6, 7, 9]
+```
 
 ### 3. Exclude
-Input:
-- lower bound
-- upper bound
-- amount
-- exclude list
 
-Output:
-- a list of distinct random integers that never contain the excluded integers
+**Inputs**
+- `Lower bound`
+- `Upper bound`
+- `Amount`
+- `Elements to exclude`
+
+**Behavior**
+- Validates that all excluded integers are inside the range
+- Removes the excluded integers from the candidate pool
+- Randomly selects distinct integers from the remaining pool
+- Sorts the final result
+
+**Example**
+Range `1-10`, amount `4`, exclude list `3,5`
+
+Possible result:
+```text
+[1, 4, 8, 10]
+```
 
 ### 4. Specify
-Input:
-- amount
-- specify list
 
-Output:
-- a random selection of items from the given string list
+**Inputs**
+- `Specified list`
+- `Amount`
 
-## Typical Flow
+**Behavior**
+- Parses a comma-separated string list
+- Selects distinct items by randomly picking indices
+- Returns the chosen items in sorted order
 
-1. The user selects a mode in the GUI.
-2. `RandListApp` collects the current text-field values.
-3. `InputHandler` parses the input strings into integers, integer lists, or string lists.
-4. The corresponding generator object is created.
-5. Input is validated.
-6. The result list is generated.
-7. `RandListApp` appends the formatted result to the output area.
-8. `InputMemory` stores the current input state for later restoration.
+**Example**
+List `apple, banana, cherry, mango`, amount `2`
 
-## UX Details
+Possible result:
+```text
+[apple, mango]
+```
 
-- Each generated result is displayed with a numbered prefix (e.g., `01:`, `02:`).
-- Clicking the prefix copies the full result (including the prefix) to the clipboard.
-- Hovering over a prefix temporarily highlights it and shows a hint in the title area.
-- The UI is designed to remain minimal and clean, prioritizing clarity and speed for quick random generation tasks.
+## Input Rules
+
+### Numeric modes (`Simple`, `Include`, `Exclude`)
+
+The current validation rules are:
+
+- `Lower bound` must be `< Upper bound`
+- `Lower bound` must be `>= 0`
+- `Upper bound` must be `> 0`
+- `Amount` must be `> 0`
+- `Amount` must not exceed the available number of elements in the mode
+
+### Include mode
+
+Additional rules:
+
+- Included elements must not contain duplicates
+- Minimum included element must not be below the lower bound
+- Maximum included element must not exceed the upper bound
+- `Amount` must be **greater than or equal to** the number of included elements
+
+### Exclude mode
+
+Additional rules:
+
+- Excluded elements must not contain duplicates
+- Minimum excluded element must not be below the lower bound
+- Maximum excluded element must not exceed the upper bound
+- Excluding all elements in the range is invalid
+- The remaining available elements must still be enough to satisfy `Amount`
+
+### Specify mode
+
+Additional rules:
+
+- The specified list must not contain duplicates
+- `Amount` must be **less than or equal to** the number of specified elements
+
+## Input Syntax
+
+### Integer list syntax
+
+Used by **Include** and **Exclude** modes:
+
+```text
+1,2,3,4,5
+```
+
+Notes:
+- Both English comma `,` and Chinese comma `，` are accepted
+- Empty items such as `1,,3` are treated as invalid input
+
+### String list syntax
+
+Used by **Specify** mode:
+
+```text
+apple, banana, cherry
+```
+
+Notes:
+- Both English comma `,` and Chinese comma `，` are accepted
+- Empty items such as `a,,b` are treated as invalid input
+- Parsed strings are trimmed before use
+
+## Result Interaction
+
+Each result line has two parts:
+
+- a fixed-width prefix such as `01:`
+- the generated content
+
+Interaction details:
+
+- Clicking the prefix copies the **full line**, including the prefix
+- Hovering over the prefix makes it bold and shows `(Click to copy)` in the header
+- Long content wraps automatically in the result area
+
+## Error Messages
+
+Validation failures are reported through `InvalidInputException`.
+
+Current messages in the code include:
+
+- `Lower bound must < upper bound.`
+- `Lower bound must ≥ 0.`
+- `Upper bound must > 0.`
+- `Amount must > 0.`
+- `Amount must not exceed range.`
+- `One or more input fields are empty.`
+- `Invalid list. Example: 1,2,3,4,5...`
+- `Input has one or more duplicated elements.`
+- `Minimum element in list out of bound.`
+- `Maximum element in list out of bound.`
+- `Amount should ≥ included elements.`
+- `Amount should ≤ specified elements.`
+- `Remaining elements < amount.`
+- `All elements excluded from given range.`
+- `Lower/Upper bound or amount not integer.`
+- `Invalid list. Example: 1,ab,3.2,-4...`
+
+## Project Structure
+
+### UI Layer
+
+#### `Launcher`
+Small launcher class that delegates startup to `RandListApp`.
+
+#### `RandListApp`
+Main JavaFX application.
+
+Responsibilities:
+- build the window and mode selector
+- switch mode-specific input areas dynamically
+- handle result rendering and copy interaction
+- manage result scrolling and dynamic window height
+- save and restore mode-specific inputs
+- trigger generation on button click or `Enter`
+
+### Input Layer
+
+#### `InputHandler`
+Parses raw text input and dispatches generation requests to the correct mode.
+
+Responsibilities:
+- parse single integer fields
+- parse comma-separated integer lists
+- parse comma-separated string lists
+- validate mode-level empty/syntax cases before domain generation
+- route generation by selected mode
+
+#### `InputMemory`
+Stores the latest input values for each mode so switching modes does not immediately lose user input.
+
+Stored state:
+- simple mode: lower bound, upper bound, amount
+- include mode: lower bound, upper bound, amount, include list
+- exclude mode: lower bound, upper bound, amount, exclude list
+- specify mode: specified list, amount
+
+### Domain Layer
+
+#### `RandList`
+Base generator for integer-based random selection.
+
+Responsibilities:
+- hold `lowerBound`, `upperBound`, and `amount`
+- validate shared numeric constraints
+- build the candidate integer range
+- randomly pick distinct integers
+- return sorted results
+
+#### `RandListInclude`
+Extends `RandList`.
+
+Responsibilities:
+- validate include-specific constraints
+- remove included values from the candidate pool
+- generate the remaining required values
+- merge included values back into the final result
+
+#### `RandListExclude`
+Extends `RandList`.
+
+Responsibilities:
+- validate exclude-specific constraints
+- remove excluded values from the candidate pool
+- generate the final result from the remaining values
+
+#### `RandListSpecified`
+String-list generator built on top of index selection through `RandList`.
+
+Responsibilities:
+- validate the specified list
+- generate random distinct indices
+- map indices back to strings
+- return sorted string results
+
+### Exception Layer
+
+#### `InvalidInputException`
+Custom runtime exception used for user-facing validation errors.
+
+## Generation Flow
+
+1. The user selects a mode.
+2. `RandListApp` builds the matching input area.
+3. The user enters values and clicks **Generate** (or presses **Enter**).
+4. `InputHandler` parses raw text into typed values.
+5. A mode-specific generator is created.
+6. Validation runs.
+7. A random distinct result is generated.
+8. The result is appended to the UI.
+9. The current mode input values remain available through `InputMemory`.
 
 ## Tech Stack
 
