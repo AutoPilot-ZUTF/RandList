@@ -16,7 +16,8 @@ RandList is a JavaFX desktop application for generating random lists under sever
 
 ## UI Preview
 
-<img width="437" height="406" alt="RandList UI" src="https://github.com/user-attachments/assets/1e032410-d184-4d95-97d5-aad68da7c83a" />
+<img width="532" height="832" alt="Screenshot 2026-04-15 at 23 12 45" src="https://github.com/user-attachments/assets/46b06309-7ca9-4a5c-ae85-a6f6bca3425c" />
+
 
 
 ## Project Structure
