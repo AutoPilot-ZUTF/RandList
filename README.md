@@ -1,5 +1,3 @@
-
-
 # RandList
 
 RandList is a JavaFX desktop application for generating random lists under several modes, including simple generation, inclusion, exclusion, and specified-list selection.
@@ -10,10 +8,15 @@ RandList is a JavaFX desktop application for generating random lists under sever
 - **Include mode**: generate random integers while forcing a given set of numbers to be included.
 - **Exclude mode**: generate random integers while removing a given set of numbers from the candidate range.
 - **Specify mode**: generate results from a user-provided list of strings instead of an integer range.
+- **Clickable results**: click the result prefix (e.g., `01:`) to copy the corresponding result.
+- **Hover feedback**: hovering over a result prefix highlights it and shows a copy hint in the UI.
+- **Auto layout & wrapping**: results automatically wrap and align cleanly in the output area.
 - **Input validation**: centralized validation with custom exception handling.
 - **Input memory**: remembers user inputs for different modes in the GUI.
 
-- <img width="437" height="406" alt="Screenshot 2026-04-06 at 21 32 19" src="https://github.com/user-attachments/assets/1e032410-d184-4d95-97d5-aad68da7c83a" />
+## UI Preview
+
+<img width="437" height="406" alt="RandList UI" src="https://github.com/user-attachments/assets/1e032410-d184-4d95-97d5-aad68da7c83a" />
 
 
 ## Project Structure
@@ -215,6 +218,13 @@ Output:
 6. The result list is generated.
 7. `RandListApp` appends the formatted result to the output area.
 8. `InputMemory` stores the current input state for later restoration.
+
+## UX Details
+
+- Each generated result is displayed with a numbered prefix (e.g., `01:`, `02:`).
+- Clicking the prefix copies the full result (including the prefix) to the clipboard.
+- Hovering over a prefix temporarily highlights it and shows a hint in the title area.
+- The UI is designed to remain minimal and clean, prioritizing clarity and speed for quick random generation tasks.
 
 ## Tech Stack
 
