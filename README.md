@@ -4,8 +4,11 @@ RandList is a random list generator for quickly picking random results from a nu
 
 > This project is not open source. This GitHub page is only used for project presentation and usage information.
 <br>
-<img width="1083" height="677" alt="mac iphone 2" src="https://github.com/user-attachments/assets/eb01b8b9-1ae8-496e-9eae-8f0369aec1a2" />
-
+<p align="center">
+  <a href="https://apps.apple.com/app/randlist/id6766366716">
+    <img width="1083" height="677" alt="GitHub README" src="https://github.com/user-attachments/assets/f595ae8b-e547-451a-8866-b6678a86423e" />
+  </a>
+</p>
 
 ## Features
 
