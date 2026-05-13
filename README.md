@@ -3,6 +3,14 @@
 RandList is a random list generator for quickly picking random results from a number range or a custom list. It is useful for drawings, random grouping, choosing candidates, and generating random numbers.
 
 > This project is not open source. This GitHub page is only used for project presentation and usage information.
+Compatible with iPhone and iPad (iOS 17.0+), as well as Apple Silicon Macs (macOS 14.0+). The Liquid Glass effect requires iOS 26.0+ or macOS 26.0+.
+The original Java version of RandList is open source. If you need an open-source version, you can clone the Java repository.
+<br>
+<p align="center">
+  <a href="https://apps.apple.com/app/randlist/id6766366716">
+    <img width="1083" height="677" alt="GitHub README" src="https://github.com/user-attachments/assets/f595ae8b-e547-451a-8866-b6678a86423e" />
+  </a>
+</p>
 
 ## Features
 
@@ -211,5 +219,3 @@ RandList performs random generation, input memory, result history, and settings 
 ## Notice
 
 This repository is only for presenting RandList and explaining how to use it. It does not grant open-source rights, redistribution rights, or commercial usage rights.
-
-The Java version of RandList is open source. If you need an open-source version, you can clone the Java repository.
