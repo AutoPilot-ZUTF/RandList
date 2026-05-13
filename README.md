@@ -3,8 +3,7 @@
 RandList is a random list generator for quickly picking random results from a number range or a custom list. It is useful for drawings, random grouping, choosing candidates, and generating random numbers.
 
 > This project is not open source. This GitHub page is only used for project presentation and usage information.
-
-
+<br>
 <img width="1083" height="677" alt="github preview" src="https://github.com/user-attachments/assets/79d53adf-c4cd-4a1e-ad05-038dc5e23431" />
 
 
