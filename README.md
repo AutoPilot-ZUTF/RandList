@@ -4,6 +4,9 @@ RandList is a random list generator for quickly picking random results from a nu
 
 > This project is not open source. This GitHub page is only used for project presentation and usage information.
 
+<img width="1083" height="677" alt="github preview" src="https://github.com/user-attachments/assets/79d53adf-c4cd-4a1e-ad05-038dc5e23431" />
+
+
 ## Features
 
 - Pick unique random numbers from a specified range.
